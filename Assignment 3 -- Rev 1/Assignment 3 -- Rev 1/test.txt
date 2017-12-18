@@ -1,0 +1,36 @@
+Insert		12098		Foaad		AbuNadi			90000.00
+Insert		12009		Nancy		Henderson			60500.00
+Insert		12059		Bob		Kline				77000.00
+Insert		12019		Ken		Barker				66540.00
+Insert		12039		Bill		Baker				76356.00
+Insert		12029		Lana		Gonzalez			50000.00
+Insert		12079		Adam		Smith				90768.00
+
+PrintInOrder
+
+Delete		12029  
+Delete		12013
+
+PrintInOrder
+
+
+Update		12079		2	George
+Update		12002		4	99000.00
+Update		12039		1	12099
+
+Insert			13079		Linda		Liz			54000.00
+Insert			13019		Sara		Travis			64000.00
+Insert			13099		Sima		Tapesh			34000.00
+Insert			14079		Peter		ShoeMaker		44000.00	
+Insert			13098		Jamey		Kohat			54300.00	
+Insert			14098		Jennifer	Pavey			45600.00	
+
+PrintInOrder
+
+Search		13099
+Search		14098
+Search 		13000
+
+
+PrintBreadth
+

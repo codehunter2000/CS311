@@ -1,0 +1,17 @@
+addVertex 		e
+addVertex 		f
+addVertex 		a
+addVertex 		b
+addVertex 		c
+addVertex 		d
+addEdge		a	c	3
+addEdge		c	d	4
+addEdge		b	d	4
+addEdge		a	d	7
+addEdge		b	a	4
+addEdge		e	f	2
+countBlocks
+printGraph
+removeEdge		f	e
+removeEdge		e	f
+countBlocks			

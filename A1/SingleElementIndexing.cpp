@@ -1,23 +1,35 @@
 #include "SingleElementIndexing.h"
 
-
-/*
-	Notes:
-		1 -- Rewrtie delete method. You don't need a for loop stupid, 
-				they already gave you the id number!!!!!
-*/
-
-
 int main()
 {
 	SingleElementIndexing main;
-	main.addEmp(123450,	"ahadaegh",	"CS211ah");
-	main.printAll();
-	cout << "Press any key to exit..." << endl;
-	char input;
-	cin >> input;
+	int selection;
 	
-	
+	while (true)
+	{
+		cout << "1) Read a Transaction file" << endl;
+		cout << "2) Save Current Configuration" << endl;
+		cout << "3) Quit " << endl;
+		cout << ": " << endl;
+		cin >> selection;
+
+		if (selection == 1)
+		{
+			main.processTrasaction();
+		}
+
+
+		if (selection == 2)
+		{
+			main.saveConfig();
+		}
+
+		if (selection == 3)
+		{
+			main.saveConfig();
+			return 0;
+		}
+	}
 }
 
 bool SingleElementIndexing::addEmp(int id, string uName, string pass)
@@ -28,77 +40,132 @@ bool SingleElementIndexing::addEmp(int id, string uName, string pass)
 		return false;
 
 	int index = id % 10;
-	
+
 	if (A[index] == NULL)
 	{
-		Block firstBlock;
-		ePtr firstElement = new Employee(id, uName, pass);
-		firstBlock.top = firstElement;
-		A[index] = &firstBlock;
-		firstBlock.count = firstBlock.count + 1;
+		Block *newBlock = new Block;
+		A[index] = newBlock;
+		Employee *toAdd = new Employee(id, uName, pass);
+		newBlock->top = toAdd;
+		newBlock->tail = toAdd;
+		newBlock->count++;
 		return true;
 	}
 
 	else // if: A[index] != NULL
-	{		
-		ePtr toAdd = new Employee(id, uName, pass);
-		blockPtr p = A[id%10];
-		ePtr q;
-		if (A[index]->nextBlock == NULL)
+	{
+		Block *temp = new Block;
+		temp = A[index];
+		Employee *e = new Employee;
+		Employee *toAdd = new Employee(id, uName, pass);
+		if (temp->count < 4)	// Block not full
 		{
-			while (p->nextBlock != NULL)
-			{
-				p = p->nextBlock;
-			}
+			e = temp->tail;
+			e->nextEmp = toAdd;
+			temp->tail = toAdd;
+			temp->count++;
+			return true;
+		}
 
-			if (p->count != 4)
+		else // Block full
+		{
+			if (temp->nextBlock == NULL)
 			{
-				q = p->top;
-				while (q->nextEmp != NULL)
-				{
-					q = q->nextEmp;
-				}
-
-				q->nextEmp = toAdd;
-				p->count = p->count + 1;
+				Block *newBlock = new Block;
+				temp->nextBlock = newBlock;
+				newBlock->top = toAdd;
+				newBlock->tail = toAdd;
+				newBlock->count++;
 				return true;
 			}
 
 			else
 			{
-				Block newBlock;
-				newBlock.top = toAdd;
-				newBlock.count = newBlock.count + 1;
+				temp = temp->nextBlock;
+				Employee *e = new Employee;
+				e = temp->tail;
+				e->nextEmp = toAdd;
+				temp->tail = toAdd;
+				temp->count++;
 				return true;
 			}
 		}
 	}
+
+	return false;
+}
+
+bool SingleElementIndexing::printABlock(int blockNum)
+{
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+
+	if (A[blockNum] == NULL)
+		return false;
+
+	bTemp = A[blockNum];
+	eTemp = bTemp->top;
+	for (int i = 0; i < bTemp->count; i++)
+	{
+		cout << "===================================================" << "\n"
+			<< "ID: " << eTemp->empID << "\n" << "User Name: " << eTemp->userName
+			<< "\n" << "Password: " << eTemp->password << "\n";
+		eTemp = eTemp->nextEmp;
+	}
+
+	if (bTemp->nextBlock != NULL)
+	{
+		bTemp = bTemp->nextBlock;
+		eTemp = bTemp->top;
+		for (int i = 0; i < bTemp->count; i++)
+		{
+			cout << "===================================================" << "\n"
+				<< "ID: " << eTemp->empID << "\n" << "User Name: " << eTemp->userName
+				<< "\n" << "Password: " << eTemp->password << "\n";
+			eTemp = eTemp->nextEmp;
+		}
+	}
+
+	return true;
 }
 
 bool SingleElementIndexing::printAll()
 {
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
 	
-	blockPtr p;
-	ePtr q;
 	for (int i = 0; i < 4; i++)
 	{
-		p = A[i];
-		while (p != NULL)
+		if (A[i] != NULL)
 		{
-			if (p->top == NULL)
-				break;
-			q = p->top;
-			while (q != NULL)
+			bTemp = A[i];
+			eTemp = bTemp->top;
+			for (int j = 0; j < bTemp->count; j++)
 			{
-				cout << q;
-				q = q->nextEmp;
+				cout << "===================================================" << "\n"
+					<< "ID: " << eTemp->empID << "\n" << "User Name: " << eTemp->userName
+					<< "\n" << "Password: " << eTemp->password << "\n";
+				eTemp = eTemp->nextEmp;
 			}
 
-			p = p->nextBlock;
+			if (bTemp->nextBlock != NULL)
+			{
+				bTemp = bTemp->nextBlock;
+				eTemp = bTemp->top;
+				cout << bTemp->count;
+				for (int j = 0; j < bTemp->count; j++)
+				{
+					cout << "===================================================" << "\n"
+						<< "ID: " << eTemp->empID << "\n" << "User Name: " << eTemp->userName
+						<< "\n" << "Password: " << eTemp->password << "\n";
+					eTemp = eTemp->nextEmp;
+				}
+			}
 		}
-
 	}
+
 	return true;
+	
 }
 
 bool SingleElementIndexing::searchID(int id)
@@ -119,50 +186,117 @@ bool SingleElementIndexing::deleteEmployee(int id)
 		return false;
 	if (!alreadyInList(id))
 		return false;
-
-	blockPtr p;
-	ePtr q, prev;
 	
+	int index = id % 10;
 
-	for (int i = 0; i < 4; i++)
+	if (A[index] == NULL)
+		return false;
+
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	Employee *ePrev = new Employee;
+	bTemp = A[index];
+	eTemp = bTemp->top;
+	ePrev = bTemp->top;
+
+	if (id == eTemp->empID)
 	{
-		p = A[i];
-		while (p != NULL)
+		bTemp->top = eTemp->nextEmp;
+		bTemp->count--;
+		return true;
+	}
+
+	eTemp = eTemp->nextEmp;
+	for (int i = 1; i < bTemp->count; i++)
+	{
+		if (id == eTemp->empID)
 		{
-			if (p->top->empID == id)
+			ePrev->nextEmp = eTemp->nextEmp;
+			bTemp->count--;
+			return true;
+		}
+		eTemp = eTemp->nextEmp;
+		ePrev = ePrev->nextEmp;
+	}
+
+	if (bTemp->nextBlock != NULL)
+	{
+		bTemp = bTemp->nextBlock;
+		eTemp = bTemp->top;
+		ePrev = bTemp->top;
+
+		if (id == eTemp->empID)
+		{
+			bTemp->top = eTemp->nextEmp;
+			bTemp->count--;
+			return true;
+		}
+
+		eTemp = eTemp->nextEmp;
+		for (int i = 1; i < bTemp->count; i++)
+		{
+			if (id == eTemp->empID)
 			{
-				q = p->top;
-				q = q->nextEmp;
-				p->top = q;
-				p->count--;
+				ePrev->nextEmp = eTemp->nextEmp;
+				bTemp->count--;
 				return true;
 			}
-
-			else
-			{
-				q = p->top;
-				q = q->nextEmp;
-				prev = p->top;
-				while (q != NULL)
-				{
-					if (id == q->empID)
-					{
-						q = q->nextEmp;
-						prev->nextEmp = q;
-						p->count--;
-						return true;
-					}
-
-					q = q->nextEmp;
-					prev = prev->nextEmp;
-				}
-
-				p = p->nextBlock;
-			}
+			eTemp = eTemp->nextEmp;
+			ePrev = ePrev->nextEmp;
 		}
 	}
 
 	return false;
+}
+
+bool SingleElementIndexing::changeEmployeeID(int oldId, int newId)
+{
+	if (!validID(oldId))
+		return false;
+	if (!validID(newId))
+		return false;
+	if (!alreadyInList(oldId))
+		return false;
+
+	string uId, pass;
+	bool found = false;;
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	int index = oldId % 10;
+	if (A[index] == NULL)
+		return false;
+	bTemp = A[index];
+	eTemp = bTemp->top;
+	for (int i = 0; i < bTemp->count; i++)
+	{
+		if (eTemp->empID == oldId)
+		{
+			uId = eTemp->userName;
+			pass = eTemp->password;
+			deleteEmployee(oldId);
+			found = true;
+		}
+		eTemp = eTemp->nextEmp;
+	}
+
+	if (found == false && bTemp->nextBlock != NULL)
+	{
+		bTemp = bTemp->nextBlock;
+		eTemp = bTemp->top;
+		for (int i = 0; i < bTemp->count; i++)
+		{
+			if (eTemp->empID == oldId)
+			{
+				uId = eTemp->userName;
+				pass = eTemp->password;
+				deleteEmployee(oldId);
+				found = true;
+			}
+			eTemp = eTemp->nextEmp;
+		}
+	}
+
+	return addEmp(newId, uId, pass);
 }
 
 bool SingleElementIndexing::changeUserName(int id, string newName)
@@ -173,27 +307,37 @@ bool SingleElementIndexing::changeUserName(int id, string newName)
 		return false;
 
 	int index = id % 10;
-	blockPtr p = A[index];
-	ePtr q = p->top;
+	if (A[index] == NULL)
+		return false;
 
-	do
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	bTemp = A[index];
+	eTemp = bTemp->top;
+	for (int i = 0; i < bTemp->count; i++)
 	{
-		do
+		if (eTemp->empID == id)
 		{
-			if (q->empID == id)
+			eTemp->userName = newName;
+			return true;
+		}
+		eTemp = eTemp->nextEmp;
+	}
+
+	if (bTemp->nextBlock != NULL)
+	{
+		bTemp = bTemp->nextBlock;
+		eTemp = bTemp->top;
+		for (int i = 0; i < bTemp->count; i++)
+		{
+			if (eTemp->empID == id)
 			{
-				q->userName = newName;
+				eTemp->userName = newName;
 				return true;
 			}
-
-			q = q->nextEmp;
-
-		} while (q != NULL);
-
-		p = p->nextBlock;
-
-	} while (p != NULL);
-
+			eTemp = eTemp->nextEmp;
+		}
+	}
 
 	return false;
 }
@@ -204,45 +348,208 @@ bool SingleElementIndexing::changePassword(int id, string newPass)
 		return false;
 	if (!alreadyInList(id))
 		return false;
-
+	
 	int index = id % 10;
-	blockPtr p = A[index];
-	ePtr q = p->top;
+	if (A[index] == NULL)
+		return false;
 
-	do
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	bTemp = A[index];
+	eTemp = bTemp->top;
+	for (int i = 0; i < bTemp->count; i++)
 	{
-		do
+		if (eTemp->empID == id)
 		{
-			if (q->empID == id)
+			eTemp->password = newPass;
+			return true;
+		}
+		eTemp = eTemp->nextEmp;
+	}
+
+	if (bTemp->nextBlock != NULL)
+	{
+		bTemp = bTemp->nextBlock;
+		eTemp = bTemp->top;
+		for (int i = 0; i < bTemp->count; i++)
+		{
+			if (eTemp->empID == id)
 			{
-				q->password = newPass;
+				eTemp->password = newPass;
 				return true;
 			}
-
-			q = q->nextEmp;
-
-		} while (q != NULL);
-
-		p = p->nextBlock;
-
-	} while (p != NULL);
+			eTemp = eTemp->nextEmp;
+		}
+	}
 
 	return false;
 }
 
 bool SingleElementIndexing::loadConfig()
 {
-	return false;
+	string command, uId, pass;
+	int eId, blockNum, whichToChange, newID;
+	ifstream fin;
+	fin.open(filepath);
+	while (fin.good())
+	{
+		fin >> command;
+		if (command == "Insert")
+		{
+			fin >> eId;
+			fin >> uId;
+			fin >> pass;
+			addEmp(eId, uId, pass);
+		}
+
+		if (command == "Delete")
+		{
+			fin >> eId;
+			deleteEmployee(eId);
+		}
+
+		if (command == "Modify")
+		{
+			fin >> eId;
+			fin >> whichToChange;
+
+			if (whichToChange == 1)
+			{
+				fin >> newID;
+				changeEmployeeID(eId, newID);
+			}
+
+			if (whichToChange == 2)
+			{
+				fin >> uId;
+				changeUserName(eId, uId);
+			}
+
+			if (whichToChange == 3)
+			{
+				fin >> pass;
+				changePassword(eId, pass);
+			}
+		}
+
+		if (command == "PrintAll")
+		{
+			printAll();
+		}
+
+		if (command == "PrintABlock")
+		{
+			fin >> blockNum;
+			printABlock(blockNum);
+		}
+
+		if (command == "Save")
+		{
+			saveConfig();
+		}
+	}
+	return true;
 }
 
 bool SingleElementIndexing::saveConfig()
 {
-	return false;
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	ofstream fout;
+	fout.open(filepath);
+	for (int i = 0; i < 4; i++)
+	{
+		if (A[i] != NULL)
+		{
+			bTemp = A[i];
+			eTemp = bTemp->top;
+			for (int j = 0; j < bTemp->count; j++)
+			{
+				fout << eTemp->empID << endl;
+				fout << eTemp->userName << endl;
+				fout << eTemp->password << endl;
+				eTemp = eTemp->nextEmp;
+			}
+
+			if (bTemp->nextBlock != NULL)
+			{
+				bTemp = bTemp->nextBlock;
+				eTemp = bTemp->top;
+				for (int j = 0; j < bTemp->count; j++)
+				{
+					fout << eTemp->empID << "\t";
+					fout << eTemp->userName << "\t";
+					fout << eTemp->password << "\t";
+					fout << "\n" << endl;
+					eTemp = eTemp->nextEmp;
+				}
+			}
+		}
+	}
+	
+	return true;
 }
 
 bool SingleElementIndexing::processTrasaction()
 {
-	return false;
+	string command, uId, pass;
+	int eId, blockNum, whichToChange;
+	string userPath;
+	ifstream fin;
+	cout << "Please enter the file path: " << endl;
+	cin >> userPath;
+	fin.open(userPath);
+	while (fin.good())
+	{
+		fin >> command;
+		if (command == "Insert")
+		{
+			fin >> eId;
+			fin >> uId;
+			fin >> pass;
+			addEmp(eId, uId, pass);
+		}
+
+		if (command == "Delete")
+		{
+			fin >> eId;
+			deleteEmployee(eId);
+		}
+
+		if (command == "Modify")
+		{
+			fin >> eId;
+			fin >> whichToChange;
+			if (whichToChange == 2)
+			{
+				fin >> uId;
+				changeUserName(eId, uId);
+			}
+
+			if (whichToChange == 3)
+			{
+				fin >> pass;
+				changePassword(eId, pass);
+			}
+		}
+
+		if (command == "PrintAll")
+		{
+			printAll();
+		}
+
+		if (command == "PrintABlock")
+		{
+			fin >> blockNum;
+			printABlock(blockNum);
+		}
+
+		if (command == "Save")
+		{
+			saveConfig();
+		}
+	}
+	return true;
 }
 
 bool SingleElementIndexing::validID(int id)
@@ -264,43 +571,44 @@ bool SingleElementIndexing::alreadyInList(int id)
 
 bool SingleElementIndexing::inFirstBlock(int id)
 {
-	blockPtr p = A[id % 10];
-	ePtr q;
-	if (p == NULL)
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	int index = id % 10;
+	if (A[index] == NULL)
 		return false;
-	else
+	bTemp = A[index];
+	eTemp = bTemp->top;
+	if (eTemp == NULL)
+		return false;
+	for (int i = 0; i < bTemp->count; i++)
 	{
-		q = p->top;
-		while (q != NULL)
-		{
-			if (q->empID == id)
-				return true;
-			else
-				q = q->nextEmp;
-		}
+		if (eTemp->empID == id)
+			return true;
+		eTemp = eTemp->nextEmp;
 	}
 	return false;
 }
 
 bool SingleElementIndexing::inSecondBlock(int id)
 {
-	blockPtr p = A[id % 10];
-	ePtr q;
-	if (p == NULL)
+	Block *bTemp = new Block;
+	Employee *eTemp = new Employee;
+	int index = id % 10;
+	if (A[index] == NULL)
 		return false;
-	if (p->nextBlock == NULL)
+	bTemp = A[index];
+	if (bTemp->nextBlock == NULL)
 		return false;
-	else
+
+	bTemp = bTemp->nextBlock;
+	eTemp = bTemp->top;
+	if (eTemp == NULL)
+		return false;
+	for (int i = 0; i < bTemp->count; i++)
 	{
-		p = p->nextBlock;
-		q = p->top;
-		while (q != NULL)
-		{
-			if (q->empID == id)
-				return true;
-			else
-				q = q->nextEmp;
-		}
+		if (eTemp->empID == id)
+			return true;
+		eTemp = eTemp->nextEmp;
 	}
 	return false;
 }
